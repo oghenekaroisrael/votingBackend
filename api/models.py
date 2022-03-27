@@ -39,8 +39,8 @@ class Poll(models.Model):
 
 class Candidate(models.Model):
     # candidate_name = models.CharField(default='', blank=True, null=True)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    election = models.ForeignKey(Election, on_delete=models.CASCADE, blank=True, null=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, to_field='id')
+    election = models.ForeignKey(Election, on_delete=models.CASCADE, blank=True, null=True, to_field='id')
     status = models.CharField(choices=CANDIDATE_STATUS, max_length=15, blank=True, default=CANDIDATE_STATUS[0], null=True)
     creation_date = models.DateTimeField(auto_now_add=True, blank=True)
     def __str__(self) -> str:

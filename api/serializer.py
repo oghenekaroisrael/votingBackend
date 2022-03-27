@@ -21,3 +21,10 @@ class VoteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Vote
         fields = '__all__'
+
+class VoteResultSerializer(serializers.ModelSerializer):
+    creation_date = serializers.DateField()
+    election = serializers.CharField()
+    status = serializers.CharField()
+    user = serializers.CharField()
+

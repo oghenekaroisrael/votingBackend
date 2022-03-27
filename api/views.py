@@ -1,5 +1,5 @@
 from datetime import datetime
-from itertools import count
+from django.db.models import Count
 from sqlite3 import Date
 from xmlrpc.client import DateTime
 from django.http import response
@@ -215,7 +215,7 @@ def vote(request):
 def get_votes(request, election_id):
     paginator = PageNumberPagination()
     paginator.page_size = REST_FRAMEWORK['PAGINATE_BY']
-    votes = Vote.objects.filter(id=election_id).order_by('id')
+    votes = Vote.objects.all().annotate(Count('candidate', distinct=True)).filter(election_id=election_id).order_by('id')
 
     result_page = paginator.paginate_queryset(votes, request)
 
