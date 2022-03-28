@@ -1,4 +1,7 @@
 from rest_framework import serializers
+from user.models import User
+
+from user.serializers import UserSerializer
 from .models import Candidate, Poll, Election, Vote
 
 
@@ -23,8 +26,7 @@ class VoteSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class VoteResultSerializer(serializers.ModelSerializer):
-    creation_date = serializers.DateField()
-    election = serializers.CharField()
-    status = serializers.CharField()
-    user = serializers.CharField()
+    user = serializers.PrimaryKeyRelatedField(queryset=User.objects.all(), many=False) 
+    class Meta:
+        fields = ['poll','candidate','election','user']
 
