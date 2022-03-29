@@ -92,6 +92,7 @@ def logout(request):
 @api_view(["POST"])
 def register(request):
     req = json.loads(json.dumps(request.data))
+    email = req["email"]
     url = "https://api.luxand.cloud/photo/search"
     payload = { "photo": req["photo"] }
     headers = { 'token': "b4a771e51ce54de2a65841db6d8259f1" }
@@ -122,6 +123,10 @@ def register(request):
         serializer = UserSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
+
+        currentUser = User.objects.filter(email=email).update(face_id=face_id, image_url=image_url)
+        # currentUser.save()
+
         status_code = status.HTTP_201_CREATED
         message = 'User registered  successfully'
     else:
