@@ -1,3 +1,4 @@
+from ast import If
 from datetime import datetime
 from django.db.models import Count, Q
 from sqlite3 import Date
@@ -198,14 +199,19 @@ def delete_election(request, election_id):
 def vote(request):
     payload = json.loads(request.body)
     try:
-        Vote.objects.create(
-            vote_date= datetime.now(),
-            candidate=Candidate.objects.get(id=payload['candidateId']),
-            poll=Poll.objects.get(id=payload['pollId']),
-            election=Election.objects.get(id=payload['electionId']),
-            user=User.objects.get(id=payload['userId']),
-        )
-        return JsonResponse({'message': 'Your Vote Was Collated Successfully'}, safe=False, status=status.HTTP_201_CREATED)
+        voteExist = Vote.objects.filter(user=payload['userId'])
+        # print(voteExist)
+        if(voteExist):
+            return JsonResponse({'message': 'You Have Already Voted'}, safe=False, status=status.HTTP_302_FOUND)
+        else:
+            Vote.objects.create(
+                vote_date= datetime.now(),
+                candidate=Candidate.objects.get(id=payload['candidateId']),
+                poll=Poll.objects.get(id=payload['pollId']),
+                election=Election.objects.get(id=payload['electionId']),
+                user=User.objects.get(id=payload['userId']),
+            )
+            return JsonResponse({'message': 'Your Vote Was Collated Successfully'}, safe=False, status=status.HTTP_201_CREATED)
     except ObjectDoesNotExist as e:
         return JsonResponse({'error': str(e)}, safe=False, status=status.HTTP_404_NOT_FOUND)
     except Exception as e:
@@ -215,7 +221,7 @@ def vote(request):
 def get_votes(request, election_id):
     paginator = PageNumberPagination()
     paginator.page_size = REST_FRAMEWORK['PAGINATE_BY']
-    votes = Vote.objects.values("user","election", "poll","candidate").annotate(count=Count('candidate', filter=Q(election_id=election_id))).order_by('-count')
+    votes = Vote.objects.values("election", "poll","candidate").annotate(count=Count('candidate', filter=Q(election_id=election_id))).order_by('-count')
 
     result_page = paginator.paginate_queryset(votes, request)
 

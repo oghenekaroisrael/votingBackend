@@ -71,6 +71,14 @@ def get_profile(request):
     return Response({'success': 'true', 'data': serializer.data}, status=status.HTTP_200_OK)
 
 
+@api_view(["GET"])
+def get_user_profile(request,user_id):
+    user = User.objects.filter(id=user_id).first()
+
+    serializer = UserSerializer(user, many=False)
+    return Response({'success': 'true', 'data': serializer.data}, status=status.HTTP_200_OK)
+
+
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def logout(request):
