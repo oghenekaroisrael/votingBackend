@@ -25,8 +25,3 @@ class VoteSerializer(serializers.ModelSerializer):
         model = Vote
         fields = '__all__'
 
-class VoteResultSerializer(serializers.ModelSerializer):
-    user = serializers.PrimaryKeyRelatedField(queryset=User.objects.all(), many=False) 
-    class Meta:
-        fields = ['poll','candidate','election','user']
-

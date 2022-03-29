@@ -9,7 +9,7 @@ from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticated
-from .serializer import CandidateSerializer, PollSerializer, ElectionSerializer, VoteResultSerializer, VoteSerializer
+from .serializer import CandidateSerializer, PollSerializer, ElectionSerializer
 from votingBackend.settings import REST_FRAMEWORK
 from .models import Candidate, Poll, Election, Vote
 from user.models import User
@@ -208,18 +208,16 @@ def vote(request):
         return JsonResponse({'message': 'Your Vote Was Collated Successfully'}, safe=False, status=status.HTTP_201_CREATED)
     except ObjectDoesNotExist as e:
         return JsonResponse({'error': str(e)}, safe=False, status=status.HTTP_404_NOT_FOUND)
-    except Exception:
-        return JsonResponse({'error': 'Something terrible went wrong'}, safe=False, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, safe=False, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 @api_view(["GET"])
 def get_votes(request, election_id):
     paginator = PageNumberPagination()
     paginator.page_size = REST_FRAMEWORK['PAGINATE_BY']
-    # filters = filter=Q(election_id=election_id)
     votes = Vote.objects.values("user","election", "poll","candidate").annotate(count=Count('candidate', filter=Q(election_id=election_id))).order_by('-count')
 
     result_page = paginator.paginate_queryset(votes, request)
 
-    serializer = VoteResultSerializer(result_page, many=True)
 
     return paginator.get_paginated_response(result_page)
